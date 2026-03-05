@@ -1,0 +1,108 @@
+import random
+
+def show_intro():
+    print("Добро пожаловать в игру 'Побег из тюрьмы'!")
+    print("Вы оказались в тюремной камере. Ваша цель — сбежать.")
+    print("Используйте команды: осмотреть, искать, идти [направление], использовать [предмет]\n")
+
+def create_world():
+    return {
+        'камера': {
+            'описание': 'Мрачная тюремная камера с железной кроватью и маленьким окном.',
+            'предметы': ['ложка', 'записка'],
+            'выходы': {'коридор': 'дверь'}
+        },
+        'коридор': {
+            'описание': 'Длинный коридор с камерами по обеим сторонам. Вдалеке виден охранник.',
+            'предметы': ['ключ'],
+            'выходы': {'камера': 'дверь', 'двор': 'лестница'}
+        },
+        'двор': {
+            'описание': 'Тюремный двор. За забором видна свобода!',
+            'предметы': [],
+            'выходы': {'коридор': 'лестница', 'свобода': 'забор'}
+        }
+    }
+
+def main():
+    world = create_world()
+    inventory = []
+    current_location = 'камера'
+    game_over = False
+
+    show_intro()
+
+    while not game_over:
+        location = world[current_location]
+        print(f"\nВы находитесь в: {current_location}")
+        print(location['описание'])
+
+        if location['предметы']:
+            print(f"Здесь вы видите: {', '.join(location['предметы'])}")
+
+        command = input("\nЧто будете делать? ").lower().strip().split()
+
+        if not command:
+            continue
+
+        action = command[0]
+
+        # Осмотреть
+        if action == 'осмотреть':
+            print(location['описание'])
+            if location['предметы']:
+                print(f"Предметы: {', '.join(location['предметы'])}")
+            print(f"Выходы: {', '.join(location['выходы'].keys())}")
+
+        # Искать
+        elif action == 'искать':
+            if random.random() < 0.3:
+                if location['предметы']:
+                    found = location['предметы'].pop(0)
+                    inventory.append(found)
+                    print(f"Вы нашли: {found}")
+                else:
+                    print("Ничего интересного не найдено.")
+            else:
+                print("Ничего не найдено.")
+
+        # Идти
+        elif action == 'идти' and len(command) > 1:
+            direction = command[1]
+            if direction in location['выходы']:
+                current_location = direction
+                if current_location == 'свобода':
+                    print("\nПоздравляем! Вы успешно сбежали из тюрьмы!")
+                    game_over = True
+            else:
+                print("Туда нельзя пойти.")
+
+        # Использовать
+        elif action == 'использовать' and len(command) > 1:
+            item = command[1]
+            if item in inventory:
+                if item == 'ключ' and current_location == 'двор':
+                    print("Вы перелезли через забор с помощью ключа!")
+                    current_location = 'свобода'
+                else:
+                    print(f"Вы использовали {item}, но ничего не произошло.")
+            else:
+                print("У вас нет такого предмета.")
+
+        # Инвентарь
+        elif action == 'инвентарь':
+            if inventory:
+                print(f"У вас есть: {', '.join(inventory)}")
+            else:
+                print("Инвентарь пуст.")
+
+        # Выход
+        elif action == 'выход':
+            game_over = True
+            print("Игра окончена.")
+
+        else:
+            print("Неизвестная команда. Попробуйте: осмотреть, искать, идти [место], использовать [предмет], инвентарь")
+
+if __name__ == "__main__":
+    main()
