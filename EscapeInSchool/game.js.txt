@@ -1,0 +1,142 @@
+const storyElement = document.getElementById('story');
+const choicesElement = document.getElementById('choices');
+
+let currentScene = 'start';
+
+const scenes = {
+    start: {
+        text: "Ты ученик выпускного класса. До конца уроков осталось 15 минут, но ты не можешь больше ждать! Ты решаешь сбежать из школы. Куда направишься?",
+        choices: [
+            { text: "Через главный вход", nextScene: 'main_entrance' },
+            { text: "Через окно на втором этаже", nextScene: 'window' },
+            { text: "Через запасной выход", nextScene: 'back_exit' }
+        ]
+    },
+    main_entrance: {
+        text: "У главного входа стоит вахтёрша. Она подозрительно смотрит на тебя. Что делать?",
+        choices: [
+            { text: "Попытаться пройти мимо, делая вид, что всё нормально", nextScene: 'sneak_past' },
+            { text: "Побежать к выходу", nextScene: 'run_to_exit' },
+            { text: "Вернуться и выбрать другой путь", nextScene: 'start' }
+        ]
+    },
+    window: {
+        text: "Ты подходишь к окну. Оно открыто, но до земли далеко. Что предпримешь?",
+        choices: [
+            { text: "Прыгнуть", nextScene: 'jump' },
+            { text: "Найти верёвку или что‑то, чтобы спуститься", nextScene: 'find_rope' },
+            { text: "Передумать и выбрать другой путь", nextScene: 'start' }
+        ]
+    },
+    back_exit: {
+        text: "Запасной выход кажется свободным. Ты осторожно открываешь дверь...",
+        choices: [
+            { text: "Выйти и бежать к воротам", nextScene: 'escape_attempt' },
+            { text: "Осмотреться — нет ли кого поблизости", nextScene: 'look_around' }
+        ]
+    },
+    sneak_past: {
+        result: Math.random() > 0.5 ?
+            {
+                text: "Тебе удалось пройти мимо вахтёрши! Она не обратила на тебя внимания.",
+                nextScene: 'freedom'
+            } :
+            {
+                text: "Вахтёрша остановила тебя и отправила к директору. Теперь ты остаёшься в школе ещё на 5 лет!",
+                nextScene: 'caught'
+            }
+    },
+    run_to_exit: {
+        result: Math.random() > 0.3 ?
+            {
+                text: "Ты быстро пробежал мимо вахтёрши и выскочил на улицу!",
+                nextScene: 'freedom'
+            } :
+            {
+                text: "Вахтёрша схватила тебя за рукав. Теперь ты остаёшься в школе ещё на 5 лет!",
+                nextScene: 'caught'
+            }
+    },
+    jump: {
+        result: Math.random() > 0.7 ?
+            {
+                text: "Ты удачно приземлился и побежал прочь от школы!",
+                nextScene: 'freedom'
+            } :
+            {
+                text: "При приземлении ты подвернул ногу. Учителя нашли тебя и вернули в школу. Теперь ты остаёшься здесь ещё на 5 лет!",
+                nextScene: 'caught'
+            }
+    },
+    find_rope: {
+        result: Math.random() > 0.5 ?
+            {
+                text: "Ты нашёл старую верёвку в подсобке и успешно спустился!",
+                nextScene: 'freedom'
+            } :
+            {
+                text: "Верёвки не оказалось, а пока ты искал, тебя заметили учителя. Теперь ты остаёшься в школе ещё на 5 лет!",
+                nextScene: 'caught'
+            }
+    },
+    look_around: {
+        result: Math.random() > 0.6 ?
+            {
+                text: "Вокруг никого нет. Ты быстро выбегаешь и мчишься к свободе!",
+                nextScene: 'freedom'
+            } :
+            {
+                text: "Из‑за угла вышли директор и два завуча. Они поймали тебя. Теперь ты остаёшься в школе ещё на 5 лет!",
+                nextScene: 'caught'
+            }
+    },
+    escape_attempt: {
+        result: Math.random() > 0.4 ?
+            {
+                text: "Ты выбежал через запасной выход и помчался к воротам. Никто не заметил твоего побега!",
+                nextScene: 'freedom'
+            } :
+            {
+                text: "Прямо у ворот тебя встретил директор. Он строго посмотрел на тебя и повёл в кабинет. Теперь ты остаёшься в школе ещё на 5 лет!",
+                nextScene: 'caught'
+            }
+    },
+    freedom: {
+        text: "<h2>СВОБОДА!!!!</h2><p>Ты успешно сбежал из школы! Наслаждайся свободой!</p>",
+        choices: []
+    },
+    caught: {
+        text: "<h2>Пойман!</h2><p>Учителя, директор и педагоги поймали тебя. По правилам школы, за попытку побега ты остаёшься учиться здесь ещё 5 лет...</p>",
+        choices: []
+    }
+};
+
+function showScene(sceneKey) {
+    const scene = scenes[sceneKey];
+    
+    if (scene.result) {
+        const result = scene.result;
+        storyElement.innerHTML = result.text;
+        choicesElement.innerHTML = '';
+        
+        if (result.nextScene) {
+            setTimeout(() => {
+                showScene(result.nextScene);
+            }, 3000);
+        }
+    } else {
+        storyElement.textContent = scene.text;
+        choicesElement.innerHTML = '';
+        
+        scene.choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.textContent = choice.text;
+            button.addEventListener('click', () => {
+                showScene(choice.nextScene);
+            });
+            choicesElement.appendChild(button);
+        });
+    }
+}
+
+showScene(currentScene);
