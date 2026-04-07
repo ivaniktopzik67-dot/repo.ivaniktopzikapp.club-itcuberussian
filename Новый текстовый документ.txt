@@ -1,0 +1,8 @@
+Escape_from-treehouse
+--__pycache__
+--Новая папка
+--game_data.py
+--main.py
+--README.md
+--start_game.bat
+--utils.py
